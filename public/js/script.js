@@ -241,6 +241,7 @@ function startTest(){
   testActive = true;
   stopCaretAnimation();
   testStart = Date.now();
+  showNotification('testStarted');
   if (config.mode == "time") {
     showTimer();
   }
@@ -265,7 +266,7 @@ function startTest(){
 }
 
 function compareInput() {
-  const ts = performance.now();
+  // const ts = performance.now();
   $(".word.active").empty();
   let ret = "";
   let currentWord = wordsList[currentWordIndex];
@@ -296,8 +297,8 @@ function compareInput() {
     currentInput = "";
     showResult();
   }
-  const te = performance.now();
-  console.log(`compare input took ${(te-ts)} miliseconds`);
+  // const te = performance.now();
+  // console.log(`compare input took ${(te-ts)} miliseconds`);
   // liveWPM()
 }
 
@@ -933,8 +934,10 @@ $(document).mousemove(function(event) {
 $("#wordsInput").keydown(function(event) {
   const kc = event["keyCode"];
 
-  //tab or enter
-  if ([13,27].includes(kc)) return;
+  // console.log(kc);
+  
+  //dont react to modifiers
+  if ([9,13,27,16,17,18,91,93,224].includes(kc)) return;
 
   // //backspace
   if(kc == 8){
@@ -1019,10 +1022,10 @@ $("#wordsInput").keydown(function(event) {
   //using a 0 timeout here so that all the code is executed on the next update tick
   //this is to make sure the inputs value was updated
   setTimeout(function() {
-    if (wordsList[currentWordIndex].substring(currentInput.length, currentInput.length + 1) != event["key"]) {
-      accuracyStats.incorrect++;
-    } else {
+    if (wordsList[currentWordIndex].substring(currentInput.length, currentInput.length + 1) == event["key"] || kc === 229) {
       accuracyStats.correct++;
+    } else {
+      accuracyStats.incorrect++;
     }
     currentInput = $("#wordsInput").val();
     setFocus(true);
