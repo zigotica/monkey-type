@@ -265,6 +265,7 @@ function startTest(){
 }
 
 function compareInput() {
+  const ts = performance.now();
   $(".word.active").empty();
   let ret = "";
   let currentWord = wordsList[currentWordIndex];
@@ -295,6 +296,8 @@ function compareInput() {
     currentInput = "";
     showResult();
   }
+  const te = performance.now();
+  console.log(`compare input took ${(te-ts)} miliseconds`);
   // liveWPM()
 }
 
