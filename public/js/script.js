@@ -277,11 +277,22 @@ function compareInput() {
       // $(letterElems[i]).removeClass('incorrect').addClass('correct');
     } else {
       if (currentWord[i] == undefined) {
-        ret +=
-          '<letter class="incorrect extra">' + currentInput[i] + "</letter>";
+        if (currentInput[i] == "|") {
+          ret += '<letter class="incorrect processing extra">' + $("#wordsInput").val()[i] + "</letter>";
+        } else {
+          ret += '<letter class="incorrect extra">' + currentInput[i] + "</letter>";
+        }
         // $($('#words .word')[currentWordIndex]).append('<letter class="incorrect">' + currentInput[i] + "</letter>");
       } else {
-        ret += '<letter class="incorrect">' + currentWord[i] + "</letter>";
+        if (currentInput[i] == "|"){
+          if ($("#wordsInput").val()[i] !== currentWord[i]) {
+            ret += '<letter class="processing">' + $("#wordsInput").val()[i] + "</letter>";
+          } else if ($("#wordsInput").val()[i] == currentWord[i]) {
+            ret += '<letter class="correct">' + currentWord[i] + "</letter>";
+        }
+        } else {
+          ret += '<letter class="incorrect">' + currentWord[i] + "</letter>";
+        }
         // $(letterElems[i]).removeClass('correct').addClass('incorrect');
       }
     }
@@ -978,6 +989,7 @@ $("#wordsInput").keydown(function(event) {
   if (kc == 32) {
     if (!testActive) return;
     if (currentInput == "") return;
+    currentInput = $("#wordsInput").val();
     event.preventDefault();
     const currentWord = wordsList[currentWordIndex];
     if (config.mode == "time") {
@@ -1016,7 +1028,7 @@ $("#wordsInput").keydown(function(event) {
   // other keycodes
 
   //if its the first one, start the test
-  if (currentInput == "" && inputHistory.length == 0) {
+  if (currentInput == "" && inputHistory.length == 0 && !testActive) {
     startTest();
   }
   //using a 0 timeout here so that all the code is executed on the next update tick
@@ -1027,7 +1039,11 @@ $("#wordsInput").keydown(function(event) {
     } else {
       accuracyStats.incorrect++;
     }
-    currentInput = $("#wordsInput").val();
+    if (kc === 229) {
+      currentInput = $("#wordsInput").val().substring(0, $("#wordsInput").val().length - 1) + "|";
+    } else {
+      currentInput = $("#wordsInput").val();
+    }
     setFocus(true);
     compareInput();
     updateCaretPosition();

@@ -769,6 +769,10 @@ key {
   color: var(--main-color);
 }
 
+.word letter.processing{
+  text-decoration: underline;
+}
+
 .word letter.incorrect {
   color: #da3333;
 }
