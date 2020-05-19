@@ -277,14 +277,14 @@ function compareInput() {
       // $(letterElems[i]).removeClass('incorrect').addClass('correct');
     } else {
       if (currentWord[i] == undefined) {
-        if (currentInput[i] == "|") {
+        if (currentInput[i] == "$") {
           ret += '<letter class="incorrect processing extra">' + $("#wordsInput").val()[i] + "</letter>";
         } else {
           ret += '<letter class="incorrect extra">' + currentInput[i] + "</letter>";
         }
         // $($('#words .word')[currentWordIndex]).append('<letter class="incorrect">' + currentInput[i] + "</letter>");
       } else {
-        if (currentInput[i] == "|"){
+        if (currentInput[i] == "$"){
           if ($("#wordsInput").val()[i] !== currentWord[i]) {
             ret += '<letter class="processing">' + $("#wordsInput").val()[i] + "</letter>";
           } else if ($("#wordsInput").val()[i] == currentWord[i]) {
@@ -945,7 +945,8 @@ $(document).mousemove(function(event) {
 $("#wordsInput").keydown(function(event) {
   const kc = event["keyCode"];
 
-  // console.log(kc);
+  console.log(kc);
+  // console.log(event);
   
   //dont react to modifiers
   if ([9,13,27,16,17,18,91,93,224].includes(kc)) return;
@@ -981,7 +982,7 @@ $("#wordsInput").keydown(function(event) {
       currentInput = $("#wordsInput").val();
       compareInput();
       updateCaretPosition();
-    },0);
+    },10);
     return;
   }
 
@@ -1034,20 +1035,21 @@ $("#wordsInput").keydown(function(event) {
   //using a 0 timeout here so that all the code is executed on the next update tick
   //this is to make sure the inputs value was updated
   setTimeout(function() {
-    if (wordsList[currentWordIndex].substring(currentInput.length, currentInput.length + 1) == event["key"] || kc === 229) {
+    if (wordsList[currentWordIndex].substring(currentInput.length, currentInput.length + 1
+      == event["key"] || kc === 229 && event.key !== " ")) {
       accuracyStats.correct++;
     } else {
       accuracyStats.incorrect++;
     }
-    if (kc === 229) {
-      currentInput = $("#wordsInput").val().substring(0, $("#wordsInput").val().length - 1) + "|";
+    if (kc === 229 && event.key !== " ") {
+      currentInput = $("#wordsInput").val().substring(0, $("#wordsInput").val().length - 1) + "$";
     } else {
       currentInput = $("#wordsInput").val();
     }
     setFocus(true);
     compareInput();
     updateCaretPosition();
-  },0);
+  },10);
 });
 
 $(document).keydown((event) => {
@@ -1065,6 +1067,17 @@ $(document).keydown((event) => {
 
 loadConfigFromCookie();
 getReleasesFromGitHub();
+
+if (firebase.app().options.projectId === "monkey-type-dev-67af4") {
+  $("#top .logo .bottom").text("monkey-dev");
+  $("head title").text("Monkey Dev")
+}
+
+if (window.location.hostname === "localhost") {
+  $("#top .logo .top").text("localhost");
+  $("head title").text($("head title").text() + " (localhost)");
+
+}
 
 $(document).ready(() => {
   $('body').css('transition', '.25s');
