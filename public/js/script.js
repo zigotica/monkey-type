@@ -277,6 +277,7 @@ function compareInput() {
       // $(letterElems[i]).removeClass('incorrect').addClass('correct');
     } else {
       if (currentWord[i] == undefined) {
+      //input is longer
         if (currentInput[i] == "$") {
           ret += '<letter class="incorrect processing extra">' + $("#wordsInput").val()[i] + "</letter>";
         } else {
@@ -284,12 +285,18 @@ function compareInput() {
         }
         // $($('#words .word')[currentWordIndex]).append('<letter class="incorrect">' + currentInput[i] + "</letter>");
       } else {
-        if (currentInput[i] == "$"){
-          if ($("#wordsInput").val()[i] !== currentWord[i]) {
-            ret += '<letter class="processing">' + $("#wordsInput").val()[i] + "</letter>";
-          } else if ($("#wordsInput").val()[i] == currentWord[i]) {
-            ret += '<letter class="correct">' + currentWord[i] + "</letter>";
-        }
+      //input is shorter
+        if (currentInput[i] == "$") {
+          let l = $("#wordsInput").val()[i];
+
+          if (l == currentWord[i]) {
+            ret += '<letter class="correct">' + l + "</letter>";
+          } else {
+            if (l === undefined) {
+              l = currentInput[i];
+            }
+            ret += '<letter class="processing">' + l + "</letter>";
+          }
         } else {
           ret += '<letter class="incorrect">' + currentWord[i] + "</letter>";
         }
@@ -983,15 +990,12 @@ $("#wordsInput").keydown(function(event) {
       compareInput();
       updateCaretPosition();
     },10);
-    return;
-  }
-
-  //space
-  if (kc == 32) {
+  }else if (kc === 32 || (kc === 229 && event.key === " ")) {
+    //space
     if (!testActive) return;
     if (currentInput == "") return;
-    currentInput = $("#wordsInput").val();
     event.preventDefault();
+    currentInput = $("#wordsInput").val();
     const currentWord = wordsList[currentWordIndex];
     if (config.mode == "time") {
       const currentTop = $($("#words .word")[currentWordIndex]).position().top;
@@ -1023,8 +1027,7 @@ $("#wordsInput").keydown(function(event) {
     currentInput = "";
     updateActiveElement();
     updateCaretPosition();
-    return;
-  }
+  }else{
 
   // other keycodes
 
@@ -1049,7 +1052,8 @@ $("#wordsInput").keydown(function(event) {
     setFocus(true);
     compareInput();
     updateCaretPosition();
-  },10);
+  }, 10);
+  }
 });
 
 $(document).keydown((event) => {
