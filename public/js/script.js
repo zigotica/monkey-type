@@ -1035,13 +1035,16 @@ $("#wordsInput").keydown(function(event) {
   if (currentInput == "" && inputHistory.length == 0 && !testActive) {
     startTest();
   }
-  //using a 0 timeout here so that all the code is executed on the next update tick
+  //using a 10 timeout here so that all the code is executed on the next update tick
   //this is to make sure the inputs value was updated
   setTimeout(function() {
-    if (wordsList[currentWordIndex].substring(currentInput.length, currentInput.length + 1
-      == event["key"] || kc === 229 && event.key !== " ")) {
+    let lastChar = wordsList[currentWordIndex].substring(currentInput.length, currentInput.length + 1);
+    if (lastChar == event["key"] || kc === 229) {
+        console.log("correct " + event["key"]);
       accuracyStats.correct++;
     } else {
+      console.log("incorrect " + event["key"]);
+
       accuracyStats.incorrect++;
     }
     if (kc === 229 && event.key !== " ") {
