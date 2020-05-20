@@ -1088,14 +1088,20 @@ loadConfigFromCookie();
 getReleasesFromGitHub();
 
 if (firebase.app().options.projectId === "monkey-type-dev-67af4") {
-  $("#top .logo .bottom").text("monkey-dev");
+  $("#top .logo .bottom").text("dev.monkey-type");
   $("head title").text("Monkey Dev")
 }
 
 if (window.location.hostname === "localhost") {
-  $("#top .logo .top").text("localhost");
+  $("#top .logo .top").text("localhost").css({
+    fontSize: '2rem',
+    lineHeight: '2rem'
+  });
   $("head title").text($("head title").text() + " (localhost)");
+}
 
+if (firebase.app().options.projectId === "monkey-type" && window.location.hostname === "localhost") {
+  $("#top .logo .top").text($("#top .logo .top").text() + " LIVE PROJECT");
 }
 
 $(document).ready(() => {
