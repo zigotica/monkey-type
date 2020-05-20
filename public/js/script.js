@@ -265,35 +265,40 @@ function startTest(){
   }, 1000));
 }
 
-function compareInput() {
+function compareInput(wordIndex, history=false) {
   // const ts = performance.now();
-  $(".word.active").empty();
+  $($("#words .word")[wordIndex]).empty();
+  // $(".word.active").empty();
   let ret = "";
-  let currentWord = wordsList[currentWordIndex];
-  let letterElems = $($("#words .word")[currentWordIndex]).children("letter");
-  for (let i = 0; i < currentInput.length; i++) {
-    if (currentWord[i] == currentInput[i]) {
+  let currentWord = wordsList[wordIndex];
+  let letterElems = $($("#words .word")[wordIndex]).children("letter");
+  let input = currentInput;
+  if (history) {
+    input = inputHistory[wordIndex];
+  }
+  for (let i = 0; i < input.length; i++) {
+    if (currentWord[i] == input[i]) {
       ret += '<letter class="correct">' + currentWord[i] + "</letter>";
       // $(letterElems[i]).removeClass('incorrect').addClass('correct');
     } else {
       if (currentWord[i] == undefined) {
       //input is longer
-        if (currentInput[i] == "$") {
+        if (input[i] == "$") {
           ret += '<letter class="incorrect processing extra">' + $("#wordsInput").val()[i] + "</letter>";
         } else {
-          ret += '<letter class="incorrect extra">' + currentInput[i] + "</letter>";
+          ret += '<letter class="incorrect extra">' + input[i] + "</letter>";
         }
-        // $($('#words .word')[currentWordIndex]).append('<letter class="incorrect">' + currentInput[i] + "</letter>");
+        // $($('#words .word')[wordIndex]).append('<letter class="incorrect">' + input[i] + "</letter>");
       } else {
       //input is shorter
-        if (currentInput[i] == "$") {
+        if (input[i] == "$") {
           let l = $("#wordsInput").val()[i];
 
           if (l == currentWord[i]) {
             ret += '<letter class="correct">' + l + "</letter>";
           } else {
             if (l === undefined) {
-              l = currentInput[i];
+              l = input[i];
             }
             ret += '<letter class="processing">' + l + "</letter>";
           }
@@ -304,16 +309,19 @@ function compareInput() {
       }
     }
   }
-  if (currentInput.length < currentWord.length) {
-    for (let i = currentInput.length; i < currentWord.length; i++) {
+  if (input.length < currentWord.length) {
+    for (let i = input.length; i < currentWord.length; i++) {
       ret += "<letter>" + currentWord[i] + "</letter>";
     }
   }
-  $(".word.active").html(ret);
-  if (currentWord == currentInput && currentWordIndex == wordsList.length - 1) {
-    inputHistory.push(currentInput);
-    currentInput = "";
-    showResult();
+  $($("#words .word")[wordIndex]).html(ret);
+  // $(".word.active").html(ret);
+  if (!history) {
+    if (currentWord == currentInput && wordIndex == wordsList.length - 1) {
+      inputHistory.push(currentInput);
+      currentInput = "";
+      showResult();
+    }
   }
   // const te = performance.now();
   // console.log(`compare input took ${(te-ts)} miliseconds`);
@@ -949,10 +957,10 @@ $(document).mousemove(function(event) {
   setFocus(false);
 });
 
-$("#wordsInput").keydown(function(event) {
+$("#wordsInput").on('keydown', function(event) {
   const kc = event["keyCode"];
 
-  console.log(kc);
+  // console.log(kc);
   // console.log(event);
   
   //dont react to modifiers
@@ -981,15 +989,15 @@ $("#wordsInput").keydown(function(event) {
         inputHistory.pop();
         currentWordIndex--; 
         updateActiveElement();
-        compareInput();
+        compareInput(currentWordIndex);
         event.preventDefault();
       }
     }
     setTimeout(function() {
       currentInput = $("#wordsInput").val();
-      compareInput();
+      compareInput(currentWordIndex);
       updateCaretPosition();
-    },10);
+    },1);
   }else if (kc === 32 || (kc === 229 && event.key === " ")) {
     //space
     if (!testActive) return;
@@ -1018,44 +1026,48 @@ $("#wordsInput").keydown(function(event) {
     if (config.mode == "time") {
       addWord();
     }
-    currentWordIndex++;
-    if (currentWordIndex == wordsList.length) {
-      showResult();
-      return;
-    }
-    $("#wordsInput").val('');
-    currentInput = "";
-    updateActiveElement();
-    updateCaretPosition();
-  }else{
+    
+    setTimeout(function() {
+      currentWordIndex++;
+      if (currentWordIndex == wordsList.length) {
+        showResult();
+        return;
+      }
+      $("#wordsInput").val('');
+      currentInput = "";
+      updateActiveElement();
+      updateCaretPosition();
+      compareInput(currentWordIndex - 1,true);
+    }, 1);
+  } else {
 
-  // other keycodes
+    // other keycodes
 
-  //if its the first one, start the test
-  if (currentInput == "" && inputHistory.length == 0 && !testActive) {
-    startTest();
-  }
-  //using a 10 timeout here so that all the code is executed on the next update tick
-  //this is to make sure the inputs value was updated
-  setTimeout(function() {
-    let lastChar = wordsList[currentWordIndex].substring(currentInput.length, currentInput.length + 1);
-    if (lastChar == event["key"] || kc === 229) {
-        console.log("correct " + event["key"]);
-      accuracyStats.correct++;
-    } else {
-      console.log("incorrect " + event["key"]);
-
-      accuracyStats.incorrect++;
+    //if its the first one, start the test
+    if (currentInput == "" && inputHistory.length == 0 && !testActive) {
+      startTest();
     }
-    if (kc === 229 && event.key !== " ") {
-      currentInput = $("#wordsInput").val().substring(0, $("#wordsInput").val().length - 1) + "$";
-    } else {
-      currentInput = $("#wordsInput").val();
-    }
-    setFocus(true);
-    compareInput();
-    updateCaretPosition();
-  }, 10);
+    //using a 10 timeout here so that all the code is executed on the next update tick
+    //this is to make sure the inputs value was updated
+    setTimeout(function() {
+      let lastChar = wordsList[currentWordIndex].substring(currentInput.length, currentInput.length + 1);
+      if (kc !== 229) {
+        if (lastChar == event["key"]) {
+          accuracyStats.correct++;
+        } else {
+          accuracyStats.incorrect++;
+        }
+      }
+      if (kc === 229 && event.key !== " ") {
+        currentInput = $("#wordsInput").val().substring(0, $("#wordsInput").val().length - 1) + "$";
+      } else {
+        currentInput = $("#wordsInput").val();
+      }
+      console.log($("#wordsInput").val())
+      setFocus(true);
+      compareInput(currentWordIndex);
+      updateCaretPosition();
+    }, 1);
   }
 });
 
