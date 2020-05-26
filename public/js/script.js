@@ -265,6 +265,7 @@ function startTest(){
   }, 1000));
 }
 
+
 function compareInput() {
   // const ts = performance.now();
   $(".word.active").empty();
@@ -1083,7 +1084,6 @@ if (firebase.app().options.projectId === "monkey-type-dev-67af4") {
 if (window.location.hostname === "localhost") {
   $("#top .logo .top").text("localhost");
   $("head title").text($("head title").text() + " (localhost)");
-
 }
 
 $(document).ready(() => {
